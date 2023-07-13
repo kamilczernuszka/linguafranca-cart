@@ -1,0 +1,124 @@
+target c;
+
+
+reactor RuchWozka1 {
+  
+input a:boolean;
+input b:boolean;
+output L1:Boolean;
+output R1:Boolean;  
+output ce_koniec1:Boolean;
+
+
+
+
+
+
+initial mode RW1P {
+    reaction (reset) -> R1 {=
+    lf_set(R1,1);
+    =}
+reaction(b) -> RW1L {=
+lf_set_mode(RW1L);
+=}
+}
+mode RW1L {
+    reaction (reset) -> R1 {=
+    lf_set(R1,1);
+    =}
+reaction(a) -> Koniec1 {=
+lf_set_mode(Koniec1);
+=}
+}
+mode Koniec1 {
+reaction (reset) -> ce_koniec1 {=
+    lf_set(ce_koniec1_1);
+=}
+}
+}
+
+
+reactor RuchWozka2 {
+  
+input c:boolean;
+input d:boolean;
+output L2:Boolean;
+output R2:Boolean;  
+output ce_koniec2:Boolean;
+
+
+
+
+
+initial mode RW2P {
+    reaction (reset) -> R2 {=
+    lf_set(R2,1);
+    =}
+reaction(d) -> RW1L {=
+lf_set_mode(RW1L);
+=}
+}
+mode RW1L {
+    reaction (reset) -> R2 {=
+    lf_set(R2,1);
+    =}
+reaction(c) -> Koniec2 {=
+lf_set_mode(Koniec2);
+=}
+}
+mode Koniec2 {
+    reaction (reset) -> ce_koniec2 {=
+        lf_set(ce_koniec2_1);
+    =}
+}
+}
+
+
+
+reactor SterowanieDwomaWozkami{
+input m:boolean;
+input a:boolean;
+input b:boolean;
+input c:boolean;
+input d:boolean;
+output L1:Boolean;
+output R1:Boolean;
+output L2:Boolean;
+output R2:Boolean;
+
+
+initial mode Start
+{
+reaction (m) -> reset(RuchWozkow){=
+lf_set_mode(RuchWozkow);
+=}
+}
+
+
+mode RuchWozkow{
+   rw1 = new RuchWozka1();
+    rw2 = new RuchWozka2();
+
+
+
+    a -> rw1.a
+    b -> rw1.b
+    c -> rw2.c
+    d -> rw2.d
+    rw1.L1 -> L1
+    rw1.R1 -> R1
+    rw2.L2 -> L2
+    rw2.R2 -> R2
+reaction (rw1.ce_koniec1, rw2.ce_koniec2) -> Start {=
+    lf_set_mode(Start);
+=}
+
+
+}
+
+
+
+}
+main reactor {
+sw  = new SterowanieDwomaWozkami();
+}
